@@ -1,5 +1,6 @@
 package com.example.argel.brujula_gps;
 
+import android.app.Activity;
 import android.content.Context;
 import android.location.Criteria;
 import android.location.Location;
@@ -14,7 +15,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
     public TextView txtDegree, txtLat, txtAlt;
     public String provider;
     public Location loc;
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     }
     public LocationListener ubicacionListener = new LocationListener() {
         @Override
-        public void onLocationChanged(Location location) {
+       public void onLocationChanged(Location location) {
             try{
                 loc = manager.getLastKnownLocation(provider);
                 Log.d("Locprueba", "loc");
@@ -75,5 +76,15 @@ public class MainActivity extends AppCompatActivity {
     public void onSensorChanged(SensorEvent event){
         float degree = Math.round(event.values[0]);
         txtDegree.setText(Float.toString(degree));
+    }
+    protected void onResume() {
+        super.onResume();
+
+        // for the system's orientation sensor registered listeners
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
+                SensorManager.SENSOR_DELAY_GAME);
+    }
+    public void onAccuracyChanged(Sensor sensor, int accuracy){
+
     }
 }
