@@ -2,8 +2,10 @@ package com.example.argel.brujula_gps;
 
 import android.app.Activity;
 import android.content.Context;
+import android.icu.util.Calendar;
 import android.location.Criteria;
 import android.location.Location;
+//import com.google.android.gms.location.LocationListener;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.hardware.Sensor;
@@ -14,9 +16,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
-    public TextView txtDegree, txtLat, txtAlt;
+    public TextView txtDegree, txtLat, txtAlt, txtHora, txtDia;
     public String provider;
     public Location loc;
     public LocationManager manager;
@@ -28,9 +32,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        String currentDateString = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String currentTimeString = new SimpleDateFormat("HH:mm:ss").format(new Date());
         txtDegree = findViewById(R.id.Contenido_degree);
         txtLat = findViewById(R.id.Contenido_latitude);
         txtAlt = findViewById(R.id.Contenido_altitude);
+        txtHora = findViewById(R.id.Dia_content);
+        txtDia = findViewById(R.id.Hora_content);
+
+        txtHora.setText(currentTimeString);
+        txtDia.setText(currentDateString);
 
         manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
