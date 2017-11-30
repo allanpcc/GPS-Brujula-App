@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.icu.util.Calendar;
 import android.location.Criteria;
 import android.location.Location;
-//import com.google.android.gms.location.LocationListener;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.hardware.Sensor;
@@ -32,9 +31,9 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
     public TextView txtDegree, txtLat, txtAlt, txtHora, txtDia;
-    public String provider;
     public Location loc;
-    public LocationManager manager;
+    public LocationManager myLocationManager;
+    public CustomLocationListener myLocationListener;
     public Criteria criteria;
     private float currentDegree = 0f;
     private SensorManager mSensorManager;
@@ -56,8 +55,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         txtDegree = findViewById(R.id.Contenido_degree);
         txtLat = findViewById(R.id.Contenido_latitude);
         txtAlt = findViewById(R.id.Contenido_altitude);
-        txtHora = findViewById(R.id.Dia_content);
-        txtDia = findViewById(R.id.Hora_content);
+        txtHora = findViewById(R.id.Hora_content);
+        txtDia = findViewById(R.id.Dia_content);
 
         txtHora.setText(currentTimeString);
         txtDia.setText(currentDateString);
@@ -110,44 +109,41 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             e.printStackTrace();
         }
 
-
-        manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        criteria = new Criteria();
-        provider = manager.getBestProvider(criteria, true);
+
+        myLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        myLocationListener = new CustomLocationListener();
+
         try{
-            manager.requestLocationUpdates(provider, 5, 1, ubicacionListener);
+            myLocationManager.requestLocationUpdates(myLocationManager.NETWORK_PROVIDER, 5, 1, myLocationListener);
             Log.d("Prueba", "Entra");
         }catch(SecurityException e){
             e.printStackTrace();
         }
 
     }
-    public LocationListener ubicacionListener = new LocationListener() {
-        @Override
+
+    public class CustomLocationListener implements LocationListener {
+
        public void onLocationChanged(Location location) {
             try{
-                loc = manager.getLastKnownLocation(provider);
-                Log.d("Locprueba", "loc");
-                txtLat.setText(Double.toString(loc.getLatitude()));
-                txtAlt.setText(Double.toString(loc.getAltitude()));
+                myLocationManager.removeUpdates(myLocationListener);
+                txtLat.setText(Double.toString(location.getLatitude()));
+                txtAlt.setText(Double.toString(location.getAltitude()));
             }catch(SecurityException e){
                 e.printStackTrace();
             }
 
         }
 
-        @Override
         public void onStatusChanged(String s, int i, Bundle bundle) {
 
         }
 
-        @Override
         public void onProviderEnabled(String s) {
 
         }
 
-        @Override
         public void onProviderDisabled(String s) {
 
         }
