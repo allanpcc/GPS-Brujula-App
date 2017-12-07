@@ -80,10 +80,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         setLocationManager();
 
-        sendDegrees();
-
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-
     }
 
     public class CustomLocationListener implements LocationListener {
@@ -97,6 +94,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 xDegree = (int) getHorizontalDegree();
                 yDegree = (int) getVerticalDegree();
+
+                txtAngX.setText(Double.toString(getHorizontalDegree()));
+                txtAngY.setText(Double.toString(getVerticalDegree()));
+//                setDegrees();
 
                 sendDegrees();
             }catch(SecurityException e){
@@ -171,6 +172,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         try {
             socket =(BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device,1);
             socket.connect();
+            makeToast("Bluetooth connected");
         } catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             makeToast("Bluetooth done goof'd.");
             e.printStackTrace();
@@ -196,16 +198,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private double getHorizontalDegree() //ASIMUTAL
     {
-        // TODO Change to degrees
-        double degCosNum = (getSinFromDegree(getDeclinationDegree())-(getSinFromDegree(latCoord)*getSinFromDegree(altCoord)));
-        double degCosDen = (getCosFromDegree(latCoord)*getCosFromDegree(altCoord));
-        return degCosNum/degCosDen;
+        double degCosNum = (getSinFromDegree(getVerticalDegree())*getSinFromDegree(latCoord))-getSinFromDegree(getDeclinationDegree());
+        double degCosDen = (getCosFromDegree(getVerticalDegree())*getCosFromDegree(latCoord));
+//        return degCosDen;
+        return Math.toDegrees(Math.acos(degCosNum/degCosDen));
     }
 
     private double getDeclinationDegree()
     {
-        return getCosFromDegree((currentDay + 10) * 0.9863) * -23.44; // 0.9863 = 365/360
-                                                                    // -23.44 = inclinacion eje tierra en grados
+
+        return getCosFromDegree((currentDay + 10) * 0.9863) * -23.44; // 0.9863 = 360/365 // -23.44 = inclinacion eje tierra en grados
     }
 
     private double getSinFromDegree(Double degree){
@@ -217,16 +219,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private double getVerticalDegree() {
-        return 0.0;
+        double hourAngle = (currentHour-12)*15;
+        return Math.toDegrees(Math.acos(getSinFromDegree(latCoord)*getSinFromDegree(getDeclinationDegree())+(getCosFromDegree(latCoord)*getCosFromDegree(getDeclinationDegree())*getCosFromDegree(hourAngle))));
     }
 
     public void sendDegrees() {
-        String datos = xDegree + "," + yDegree;
+        String datos = (int) yDegree + "," + (int) xDegree;
+
+        makeToast(datos);
 
         try {
             outputStream.write(datos.getBytes());
         } catch (IOException e) {
-            makeToast("Bluetooth disconnected.");
+            makeToast("Broken pipe.");
             e.printStackTrace();
         }
     }
@@ -237,16 +242,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         txtLat.setText(Double.toString(location.getLatitude()));
         txtAlt.setText(Double.toString(location.getAltitude()));
-
-        txtAngX.setText(Double.toString(getHorizontalDegree()));
-        txtAngY.setText(Double.toString(getVerticalDegree()));
     }
 
     private void setDateTexts(){
         Calendar now = Calendar.getInstance();
 
-        currentHour = now.get(Calendar.HOUR_OF_DAY);
+//        currentHour = now.get(Calendar.HOUR_OF_DAY);
+        currentHour = 1;
         currentMonth = now.get(Calendar.MONTH);
+
         currentDay = now.get(Calendar.DAY_OF_YEAR);
 
 //        currentDateString = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
@@ -274,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         txtHora.setText(Integer.toString(currentHour));
-
+        txtAngY.setText(Double.toString(yDegree));
         sendDegrees();
     }
 
@@ -302,6 +306,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         txtDia.setText(Integer.toString(currentMonth));
+        txtAngX.setText(Double.toString(xDegree));
 
         sendDegrees();
     }
@@ -313,5 +318,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Toast toast = Toast.makeText(context, msg, duration);
         toast.setGravity(Gravity.TOP, 0, 150);
         toast.show();
+    }
+
+    private void setDegrees(){
+        txtAngX.setText((Double.toString(xDegree)));
+        txtAngY.setText((Double.toString(yDegree)));
     }
 }
