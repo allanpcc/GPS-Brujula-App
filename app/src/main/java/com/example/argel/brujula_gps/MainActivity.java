@@ -38,7 +38,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public TextView txtDegree, txtLat, txtAlt, txtHora, txtDia, txtAngX, txtAngY;
     public Location loc;
     public LocationManager myLocationManager;
-    public double altCoord, latCoord;
+    public double altCoord = 32.50;
+    public double latCoord = 105.90;
         public CustomLocationListener myLocationListener;
     public Criteria criteria;
     private float currentDegree = 0f;
@@ -78,7 +79,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         setSocket();
 
+        txtLat.setText(Double.toString(latCoord));
+
         setLocationManager();
+        txtAlt.setText(Double.toString(altCoord));
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
     }
