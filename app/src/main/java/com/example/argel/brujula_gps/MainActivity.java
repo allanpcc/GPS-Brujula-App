@@ -247,8 +247,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void setDateTexts(){
         Calendar now = Calendar.getInstance();
 
-//        currentHour = now.get(Calendar.HOUR_OF_DAY);
-        currentHour = 1;
+        currentHour = now.get(Calendar.HOUR_OF_DAY);
+//        currentHour = 1;
         currentMonth = now.get(Calendar.MONTH);
 
         currentDay = now.get(Calendar.DAY_OF_YEAR);
@@ -267,14 +267,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void addAnHour(View view) {
         currentHour++;
 
-        yDegree = yDegree + 180/16;
-
-        if(currentHour > 24) {
+        if(currentHour > 24){
             currentHour = 0;
-        }
-
-        if(yDegree > 180){
-            yDegree = 0;
         }
 
         txtHora.setText(Integer.toString(currentHour));
@@ -282,31 +276,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sendDegrees();
     }
 
-    public void addMonth(View view){
-        currentMonth++;
+    public void addDay(View view){
+        currentDay++;
 
-        if(currentMonth > 12){
-            currentMonth = 1;
+        if(currentDay > 365){
+            currentDay = 0;
         }
 
-        int step = 180/6;
+        txtDia.setText(Integer.toString(currentDay));
 
-        if(xDegree + step > 180){
-            isXDegInc = false;
-        }
-
-        if(xDegree - step < 0){
-            isXDegInc = true;
-        }
-
-        if(isXDegInc){
-            xDegree += step;
-        } else {
-            xDegree -= step;
-        }
-
-        txtDia.setText(Integer.toString(currentMonth));
-        txtAngX.setText(Double.toString(xDegree));
+        xDegree = (int) getHorizontalDegree();
+        yDegree = (int) getVerticalDegree();
 
         sendDegrees();
     }

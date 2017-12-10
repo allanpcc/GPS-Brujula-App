@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Brujula_GPS.iml" filepath="$PROJECT_DIR$/Brujula_GPS.iml" />
-      <module fileurl="file://$PROJECT_DIR$/GPS-Brujula-App.iml" filepath="$PROJECT_DIR$/GPS-Brujula-App.iml" />
+      <module fileurl="file://C:\Users\argel\AndroidStudioProjects\Brujula_GPS\GPS-Brujula-App.iml" filepath="C:\Users\argel\AndroidStudioProjects\Brujula_GPS\GPS-Brujula-App.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
