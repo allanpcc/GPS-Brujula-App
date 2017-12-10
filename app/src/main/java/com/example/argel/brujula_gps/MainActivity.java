@@ -224,6 +224,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     public void sendDegrees() {
+        setDegrees();
         String datos = (int) yDegree + "," + (int) xDegree;
 
         makeToast(datos);
@@ -254,11 +255,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         currentDay = now.get(Calendar.DAY_OF_YEAR);
 
 //        currentDateString = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
-        currentDateString = Integer.toString(currentMonth);
+        currentDateString = Integer.toString(currentDay);
 //        currentTimeString = new SimpleDateFormat("HH:mm:ss", Locale.US).format(new Date());
         currentTimeString = Integer.toString(currentHour);
 
-        isXDegInc = currentMonth < 7;
 
         txtHora.setText(currentTimeString);
         txtDia.setText(currentDateString);
