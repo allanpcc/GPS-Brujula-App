@@ -80,9 +80,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setSocket();
 
         txtLat.setText(Double.toString(latCoord));
+        txtAlt.setText(Double.toString(altCoord));
+
+        setDateTexts();
+
+        xDegree = (int) getHorizontalDegree();
+        yDegree = (int) getVerticalDegree();
+
+        txtAngX.setText(Double.toString(getHorizontalDegree()));
+        txtAngY.setText(Double.toString(getVerticalDegree()));
+//                setDegrees();
+
+        sendDegrees();
 
         setLocationManager();
-        txtAlt.setText(Double.toString(altCoord));
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
     }
@@ -103,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 txtAngY.setText(Double.toString(getVerticalDegree()));
 //                setDegrees();
 
-                sendDegrees();
+               sendDegrees();
             }catch(SecurityException e){
                 e.printStackTrace();
             }
