@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public LocationManager myLocationManager;
     public double altCoord = 32.50;
     public double latCoord = 105.90;
-        public CustomLocationListener myLocationListener;
+    public CustomLocationListener myLocationListener;
     public Criteria criteria;
     private float currentDegree = 0f;
     private SensorManager mSensorManager;
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private int currentHour = 1;
     private int currentMonth = 1;
-    private int currentDay =1;
+    private int currentDay = 1;
 
     private int xDegree = 0;
     private int yDegree = 0;
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private String currentTimeString = "";
     private String currentDateString = "";
 
-    private boolean isXDegInc = true;
+    private boolean isSimulated = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,15 +93,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         sendDegrees();
 
-        setLocationManager();
+//        setLocationManager();
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
     }
 
     public class CustomLocationListener implements LocationListener {
 
-       public void onLocationChanged(Location location) {
-            try{
+        public void onLocationChanged(Location location) {
+            try {
                 myLocationManager.removeUpdates(myLocationListener);
 
                 setLocationTexts(location);
@@ -114,8 +114,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 txtAngY.setText(Double.toString(getVerticalDegree()));
 //                setDegrees();
 
-               sendDegrees();
-            }catch(SecurityException e){
+                sendDegrees();
+            } catch (SecurityException e) {
                 e.printStackTrace();
             }
 
@@ -132,9 +132,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         public void onProviderDisabled(String s) {
 
         }
-    };
+    }
 
-    public void onSensorChanged(SensorEvent event){
+    ;
+
+    public void onSensorChanged(SensorEvent event) {
         float degree = Math.round(event.values[0]);
         txtDegree.setText(Float.toString(degree));
     }
@@ -146,35 +148,33 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
                 SensorManager.SENSOR_DELAY_GAME);
     }
-    public void onAccuracyChanged(Sensor sensor, int accuracy){
+
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
 
-    public void setSocketAction(View view){
+    public void setSocketAction(View view) {
         setSocket();
     }
 
     private void setSocket() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        if(bluetoothAdapter == null)
-        {
+        if (bluetoothAdapter == null) {
             Toast.makeText(getApplicationContext(), "No Bluetooth", Toast.LENGTH_SHORT).show();
         }
-        if(!bluetoothAdapter.isEnabled())
-        {
+        if (!bluetoothAdapter.isEnabled()) {
             Intent enable_adapter = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enable_adapter, 0);
         }
 
         Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
-        if(bondedDevices.isEmpty()){
-            Toast.makeText(getApplicationContext(),"Formar par entre dispositivos", Toast.LENGTH_SHORT).show();
-        }else{
-            for( BluetoothDevice iterator : bondedDevices){
-                if(iterator.getAddress().equals(DEVICE_ADDRESS))
-                {
-                    device=iterator;
+        if (bondedDevices.isEmpty()) {
+            Toast.makeText(getApplicationContext(), "Formar par entre dispositivos", Toast.LENGTH_SHORT).show();
+        } else {
+            for (BluetoothDevice iterator : bondedDevices) {
+                if (iterator.getAddress().equals(DEVICE_ADDRESS)) {
+                    device = iterator;
 
                     found = true;
 
@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         try {
-            socket =(BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device,1);
+            socket = (BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[]{int.class}).invoke(device, 1);
             socket.connect();
             makeToast("Bluetooth connected");
         } catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -204,43 +204,65 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         myLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         myLocationListener = new CustomLocationListener();
 
-        try{
+        try {
             myLocationManager.requestLocationUpdates(myLocationManager.NETWORK_PROVIDER, 5, 1, myLocationListener);
-        }catch(SecurityException e){
+        } catch (SecurityException e) {
             e.printStackTrace();
         }
     }
 
     private double getHorizontalDegree() //ASIMUTAL
     {
-        double degCosNum = (getSinFromDegree(getVerticalDegree())*getSinFromDegree(latCoord))-getSinFromDegree(getDeclinationDegree());
-        double degCosDen = (getCosFromDegree(getVerticalDegree())*getCosFromDegree(latCoord));
+        if (!isSimulated) {
+            double degCosNum = (getSinFromDegree(getVerticalDegree()) * getSinFromDegree(latCoord)) - getSinFromDegree(getDeclinationDegree());
+            double degCosDen = (getCosFromDegree(getVerticalDegree()) * getCosFromDegree(latCoord));
 //        return degCosDen;
-        return Math.toDegrees(Math.acos(degCosNum/degCosDen));
+            return Math.toDegrees(Math.acos(degCosNum / degCosDen));
+        } else {
+            if(simulateZenith(currentDay, currentHour) > 90.0){
+                return xDegree;
+            } else {
+                return simulateAzim(currentDay, currentHour);
+            }
+        }
     }
 
-    private double getDeclinationDegree()
-    {
+    private double getDeclinationDegree() {
 
         return getCosFromDegree((currentDay + 10) * 0.9863) * -23.44; // 0.9863 = 360/365 // -23.44 = inclinacion eje tierra en grados
     }
 
-    private double getSinFromDegree(Double degree){
+    private double getSinFromDegree(Double degree) {
         return Math.sin(Math.toRadians(degree));
     }
 
-    private double getCosFromDegree(Double degree){
+    private double getCosFromDegree(Double degree) {
         return Math.cos(Math.toRadians(degree));
     }
 
-    private double getVerticalDegree() {
-        double hourAngle = (currentHour-12)*15;
-        return Math.toDegrees(Math.acos(getSinFromDegree(latCoord)*getSinFromDegree(getDeclinationDegree())+(getCosFromDegree(latCoord)*getCosFromDegree(getDeclinationDegree())*getCosFromDegree(hourAngle))));
+    private double getVerticalDegree() { //ZENITH
+        if (!isSimulated) {
+            double hourAngle = (currentHour - 12) * 15;
+            double value = Math.toDegrees(Math.acos(getSinFromDegree(latCoord) * getSinFromDegree(getDeclinationDegree()) + (getCosFromDegree(latCoord) * getCosFromDegree(getDeclinationDegree()) * getCosFromDegree(hourAngle))));
+            return value;
+        } else {
+            if(simulateZenith(currentDay, currentHour) > 90.0){
+                return yDegree;
+            } else {
+                return simulateZenith(currentDay, currentHour);
+            }
+        }
+
     }
 
     public void sendDegrees() {
         setDegrees();
-        String datos = (int) yDegree + "," + (int) xDegree;
+        String datos;
+        if(xDegree > 180){
+            datos = (int) (180- yDegree) + "," + (int) (xDegree-180);
+        } else {
+            datos = (int) yDegree + "," + (int) xDegree;
+        }
 
         makeToast(datos);
 
@@ -252,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    private void setLocationTexts(Location location){
+    private void setLocationTexts(Location location) {
         latCoord = location.getLatitude();
         altCoord = location.getAltitude();
 
@@ -260,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         txtAlt.setText(Double.toString(location.getAltitude()));
     }
 
-    private void setDateTexts(){
+    private void setDateTexts() {
         Calendar now = Calendar.getInstance();
 
         currentHour = now.get(Calendar.HOUR_OF_DAY);
@@ -282,19 +304,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void addAnHour(View view) {
         currentHour++;
 
-        if(currentHour > 24){
+        if (currentHour > 24) {
             currentHour = 0;
         }
 
         txtHora.setText(Integer.toString(currentHour));
         txtAngY.setText(Double.toString(yDegree));
+        xDegree = (int) getHorizontalDegree();
+        yDegree = (int) getVerticalDegree();
         sendDegrees();
     }
 
-    public void addDay(View view){
+    public void addDay(View view) {
         currentDay++;
 
-        if(currentDay > 365){
+        if (currentDay > 365) {
             currentDay = 0;
         }
 
@@ -306,7 +330,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sendDegrees();
     }
 
-    private void makeToast(CharSequence msg){
+    private void makeToast(CharSequence msg) {
         Context context = getApplicationContext();
         int duration = Toast.LENGTH_SHORT;
 
@@ -315,8 +339,131 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         toast.show();
     }
 
-    private void setDegrees(){
+    private void setDegrees() {
         txtAngX.setText((Double.toString(xDegree)));
         txtAngY.setText((Double.toString(yDegree)));
+    }
+
+    private double simulateAzim(int day, int hour) {
+        if(day > 185) {
+            switch (hour) {
+                case 1:
+                    return 78.46149;
+                case 5:
+                    return 110.04968;
+                case 7:
+                    return 126.41037;
+                case 10:
+                    return 164.54801;
+                case 11:
+                    return 181.0771;
+                case 12:
+                    return 197.4864;
+                case 13:
+                    return 212.19427;
+                case 14:
+                    return 224.56138;
+                case 15:
+                    return 234.77419;
+                case 16:
+                    return 243.34685;
+                case 17:
+                    return 250.82769;
+                case 18:
+                    return 257.73714;
+                case 19:
+                    return 264.6447;
+                case 20:
+                    return 272.4180;
+                case 21:
+                    return 283.07320;
+                case 23:
+                    return 5.00664;
+                case 24:
+                    return 59.73371;
+                default:
+                    return xDegree;
+            }
+        } else {
+            switch (hour) {
+                case 1:
+                    return 78.46149;
+                case 5:
+                    return 110.04968;
+                case 7:
+                    return 126.41037;
+                case 10:
+                    return 164.54801;
+                case 11:
+                    return 181.0771;
+                case 12:
+                    return 197.4864;
+                case 13:
+                    return 212.19427;
+                case 14:
+                    return 224.56138;
+                case 15:
+                    return 234.77419;
+                case 16:
+                    return 243.34685;
+                case 17:
+                    return 250.82769;
+                case 18:
+                    return 257.73714;
+                case 19:
+                    return 264.6447;
+                case 20:
+                    return 272.4180;
+                case 21:
+                    return 283.07320;
+                case 23:
+                    return 5.00664;
+                case 24:
+                    return 59.73371;
+                default:
+                    return xDegree;
+            }
+        }
+    }
+
+    private double simulateZenith(int day, int hour) {
+        switch (hour) {
+            case 1:
+                return 151.01700;
+            case 5:
+                return 101.26332;
+            case 7:
+                return 78.89864;
+            case 10:
+                return 56.95661;
+            case 11:
+                return 55.37021;
+            case 12:
+                return 57.42378;
+            case 13:
+                return 62.75643;
+            case 14:
+                return 70.61550;
+            case 15:
+                return 80.22496;
+            case 16:
+                return 91.16681;
+            case 17:
+                return 102.81554;
+            case 18:
+                return 114.98551;
+            case 19:
+                return 127.4763;
+            case 20:
+                return 140.11019;
+            case 21:
+                return 152.6369;
+            case 23:
+                return 170.39727;
+            case 24:
+                return 163.01390;
+            default:
+                return yDegree;
+        }
     }
 }
